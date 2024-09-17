@@ -1,0 +1,2 @@
+#define ARROW_UP_NUMBER 80
+#define ARROW_DOWN_NUMBER 72
