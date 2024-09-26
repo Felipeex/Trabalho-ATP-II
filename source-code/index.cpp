@@ -31,12 +31,14 @@ struct StudentSubjects {
 
 #define NORMAL  "\x1B[0m"
 #define RED  "\x1B[31m"
+#define YELLOW  "\e[0;33m"
 #define GREEN  "\x1B[32m"
 #define MAGENTA  "\x1B[35m"
 #define WHITE   "\x1B[37m"
 
 void studentsMenu(Student students[], int &studentsLogicSize);
 void createStudent(Student students[], int &studentsLogicSize);
+int findStudentIndexByRA(Student students[], int studentsLogicSize, char RA[13]);
 
 void subjectsMenu();
 void reportsMenu();
@@ -47,6 +49,7 @@ void principalMenuTitle();
 int menu(char options[][CHAR_OPTION_FISIC_SIZE], int studentsLogicSize);
 
 int request(char message[80]);
+void clearupline(int quantityOfUpLines);
 
 int main() {
   SetConsoleOutputCP(CP_UTF8);
@@ -101,21 +104,42 @@ void createStudent(Student students[], int &studentsLogicSize) {
       printf(RED "\nDados do novo aluno de número " NORMAL "#%d\n", studentsLogicSize + 1);
 
       printf("Nome: ");
-      fgets(newStudent.name, 80, stdin);
+      gets(newStudent.name);
       fflush(stdin);
 
       if (strlen(newStudent.name) > 1) {
         printf("Registro do Aluno (EX: 26.24.1354-0): ");
-        fgets(newStudent.RA, 13, stdin);
+        gets(newStudent.RA);
         fflush(stdin);
 
-        if (request("Você realmente deseja criar esse aluno?")) {
-          students[studentsLogicSize] = newStudent;
-          studentsLogicSize++;
+        if (findStudentIndexByRA(students, studentsLogicSize, newStudent.RA) >= 0) {
+          printf(YELLOW "[AVISO] Registro de Aluno: \"%s\" já está cadastrado.\n" NORMAL, newStudent.RA); getch();
+          clearupline(5);
+        } else {
+          if (request("Você realmente deseja criar esse aluno?")) {
+            students[studentsLogicSize] = newStudent;
+            studentsLogicSize++;
+          }
+
+          clearupline(7);
         }
+
       }
-    } else { printf(RED "\nNão há mais capacidade de armazenamento para alunos." NORMAL); getch(); }
+    } else { printf(RED "\n[ERROR] Não há mais capacidade de armazenamento para alunos." NORMAL); getch(); }
   } while(studentsLogicSize < STUDENTS_FISIC_SIZE && strlen(newStudent.name) > 1);
+}
+
+int findStudentIndexByRA(Student students[], int studentsLogicSize, char RA[13]) {
+  int index = 0;
+
+  while(index < studentsLogicSize && stricmp(students[index].RA, RA))
+    index++;
+
+  if (index < studentsLogicSize) {
+    return index;
+  }
+
+  return -1;
 }
 
 void subjectsMenu() {
@@ -146,11 +170,7 @@ int menu(char options[][CHAR_OPTION_FISIC_SIZE], int quantityOfOptions) {
 
   do {
     printf("\e[?25l"); // hide cursor
-    
-    for(int index = 0; index < quantityOfOptions; index++) {
-      printf("\x1b[1F"); // move line
-      printf("\x1b[2K"); // clear line
-    }
+    clearupline(quantityOfOptions);
 
     for(int index = 0; index < quantityOfOptions; index++) {
 
@@ -266,4 +286,11 @@ int request(char message[80]) {
   }
 
    return 0;
+}
+
+void clearupline(int quantityOfUpLines) {
+  for(int index = 0; index < quantityOfUpLines; index++) {
+    printf("\x1b[1F"); // move line
+    printf("\x1b[2K"); // clear line
+  }
 }
