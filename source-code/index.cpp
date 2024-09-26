@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <windows.h>
 #include <conio.h>
+#include <ctype.h>
 
 #include "./lib/meuconio.h"
 
@@ -8,7 +9,7 @@
 #include "./headers/actions.h"
 
 struct Student {
-  int RA;
+  char RA[13];
   char name[80];
 };
 
@@ -18,7 +19,7 @@ struct Subject {
 };
 
 struct StudentSubjects {
-  int studentRA;
+  char studentRA[13];
   int subjectCode;
   float grade;
 };
@@ -26,20 +27,35 @@ struct StudentSubjects {
 #define OPTIONS_FISIC_SIZE 3
 #define CHAR_OPTION_FISIC_SIZE 300
 
-void students();
-void subjects();
-void reports();
+#define STUDENTS_FISIC_SIZE 2
+
+#define NORMAL  "\x1B[0m"
+#define RED  "\x1B[31m"
+#define GREEN  "\x1B[32m"
+#define MAGENTA  "\x1B[35m"
+#define WHITE   "\x1B[37m"
+
+void studentsMenu(Student students[], int &studentsLogicSize);
+void createStudent(Student students[], int &studentsLogicSize);
+
+void subjectsMenu();
+void reportsMenu();
 void subjectsMenuTitle();
 void studentsMenuTitle();
 void reportsMenuTitle();
 void principalMenuTitle();
-int menu(char options[][CHAR_OPTION_FISIC_SIZE], int quantityOfOptions);
+int menu(char options[][CHAR_OPTION_FISIC_SIZE], int studentsLogicSize);
+
+int request(char message[80]);
 
 int main() {
   SetConsoleOutputCP(CP_UTF8);
 
   int principalMenuOption;
   char principalOptions[OPTIONS_FISIC_SIZE][CHAR_OPTION_FISIC_SIZE] = { "Alunos", "Disciplinas", "Relatórios" };
+
+  Student students[STUDENTS_FISIC_SIZE];
+  int studentsLogicSize = 0;
 
   do {
     clrscr();
@@ -48,19 +64,19 @@ int main() {
 
     switch(principalMenuOption) {
       case 0:
-        students();
+        studentsMenu(students, studentsLogicSize);
         break;
       case 1:
-        subjects();
+        subjectsMenu();
         break;
       case 2:
-        reports();
+        reportsMenu();
         break;
     }
   } while(principalMenuOption != -1);
 }
 
-void students() {
+void studentsMenu(Student students[], int &studentsLogicSize) {
   int studentsMenuOption;
   char studentsOptions[4][CHAR_OPTION_FISIC_SIZE] = { "Cadastrar", "Consultar", "Alterar", "Excluir" };
 
@@ -68,10 +84,41 @@ void students() {
     clrscr();
     studentsMenuTitle();
     studentsMenuOption = menu(studentsOptions, 4);
+
+    switch(studentsMenuOption) {
+      case 0:
+        createStudent(students, studentsLogicSize);
+        break;
+    }
   } while(studentsMenuOption != -1);
 }
 
-void subjects() {
+void createStudent(Student students[], int &studentsLogicSize) {
+  Student newStudent;
+
+  do {
+    if (studentsLogicSize < STUDENTS_FISIC_SIZE) {
+      printf(RED "\nDados do novo aluno de número " NORMAL "#%d\n", studentsLogicSize + 1);
+
+      printf("Nome: ");
+      fgets(newStudent.name, 80, stdin);
+      fflush(stdin);
+
+      if (strlen(newStudent.name) > 1) {
+        printf("Registro do Aluno (EX: 26.24.1354-0): ");
+        fgets(newStudent.RA, 13, stdin);
+        fflush(stdin);
+
+        if (request("Você realmente deseja criar esse aluno?")) {
+          students[studentsLogicSize] = newStudent;
+          studentsLogicSize++;
+        }
+      }
+    } else { printf(RED "\nNão há mais capacidade de armazenamento para alunos." NORMAL); getch(); }
+  } while(studentsLogicSize < STUDENTS_FISIC_SIZE && strlen(newStudent.name) > 1);
+}
+
+void subjectsMenu() {
   int subjectsMenuOption;
   char subjectsOptions[4][CHAR_OPTION_FISIC_SIZE] = { "Cadastrar", "Consultar", "Alterar", "Excluir" };
 
@@ -82,7 +129,7 @@ void subjects() {
   } while(subjectsMenuOption != -1);
 }
 
-void reports() {
+void reportsMenu() {
   int reportsMenuOption;
   char reportsOptions[4][CHAR_OPTION_FISIC_SIZE] = { "Cadastrar", "Consultar", "Alterar", "Excluir" };
 
@@ -203,4 +250,20 @@ void reportsMenuTitle() {
   printf("$$ |  $$ |\\$$$$$$$\\ $$ |\\$$$$$$$ | \\$$$$  |\\$$$$$$  |$$ |      $$ |\\$$$$$$  |$$$$$$$  |\n");
   printf("\\__|  \\__| \\_______|\\__| \\_______|  \\____/  \\______/ \\__|      \\__| \\______/ \\_______/ \n\n\n\n\n\n");
   textcolor(15);
+}
+
+int request(char message[80]) {
+  printf("\n%s" GREEN "\n[S] Sim" RED " [N] Não\n" NORMAL, message);
+
+  int answer;
+
+  do {
+    answer = toupper(getch());
+  } while(answer != 'S' && answer != 'N');
+
+  if (answer == 'S') {
+    return 1;
+  }
+
+   return 0;
 }
