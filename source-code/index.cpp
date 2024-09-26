@@ -38,6 +38,8 @@ struct StudentSubjects {
 // Students
 void studentsMenu(Student students[], int &studentsLogicSize);
 void createStudent(Student students[], int &studentsLogicSize);
+void queryStudent(Student students[], int &studentsLogicSize);
+void viewStudent(Student students);
 int findStudentIndexByRA(Student students[], int studentsLogicSize, char RA[13]);
 
 // Menu
@@ -52,6 +54,7 @@ int menu(char options[][CHAR_OPTION_FISIC_SIZE], int studentsLogicSize);
 // Others
 int request(char message[80]);
 void clearupline(int quantityOfUpLines);
+void editInput(char string[]);
 
 int main() {
   SetConsoleOutputCP(CP_UTF8);
@@ -94,6 +97,12 @@ void studentsMenu(Student students[], int &studentsLogicSize) {
       case 0:
         createStudent(students, studentsLogicSize);
         break;
+      case 1:
+        queryStudent(students, studentsLogicSize);
+        break;
+      case 2:
+        editInput("Felipe");
+        break;
     }
   } while(studentsMenuOption != -1);
 }
@@ -109,13 +118,14 @@ void createStudent(Student students[], int &studentsLogicSize) {
       gets(newStudent.name);
       fflush(stdin);
 
-      if (strlen(newStudent.name) > 1) {
+      if (strlen(newStudent.name) >= 1) {
         printf("Registro do Aluno (EX: 26.24.1354-0): ");
         gets(newStudent.RA);
         fflush(stdin);
 
         if (findStudentIndexByRA(students, studentsLogicSize, newStudent.RA) >= 0) {
-          printf(YELLOW "[AVISO] Registro de Aluno: \"%s\" já está cadastrado.\n" NORMAL, newStudent.RA); getch();
+          printf(YELLOW "[AVISO] Registro de Aluno: \"%s\" já está cadastrado.\n" NORMAL, newStudent.RA);
+          getch();
           clearupline(5);
         } else {
           if (request("Você realmente deseja criar esse aluno?")) {
@@ -128,7 +138,38 @@ void createStudent(Student students[], int &studentsLogicSize) {
 
       }
     } else { printf(RED "\n[ERROR] Não há mais capacidade de armazenamento para alunos." NORMAL); getch(); }
-  } while(studentsLogicSize < STUDENTS_FISIC_SIZE && strlen(newStudent.name) > 1);
+  } while(studentsLogicSize < STUDENTS_FISIC_SIZE && strlen(newStudent.name) >= 1);
+}
+
+void queryStudent(Student students[], int &studentsLogicSize) {
+  char RA[13];
+  int studentIndex;
+
+  do {
+    printf(NORMAL "\nRegistro do Aluno para consulta (EX: 26.24.1354-0): ");
+    gets(RA);
+    fflush(stdin);
+
+    if (strlen(RA) >= 1) {
+      studentIndex = findStudentIndexByRA(students, studentsLogicSize, RA);
+
+      if (studentIndex >= 0) {
+        viewStudent(students[studentIndex]);
+        printf("\n");
+        getch();
+        clearupline(3);
+      } else {
+        printf(YELLOW "[AVISO] O Registro de Aluno: \"%s\" não existe.\n" NORMAL, RA);
+        getch();
+        clearupline(3);
+      }
+    }
+  } while(strlen(RA) >= 1);
+}
+
+void viewStudent(Student student) {
+  printf("RA: %s\t", student.RA);
+  printf("Nome: %s", student.name);
 }
 
 int findStudentIndexByRA(Student students[], int studentsLogicSize, char RA[13]) {
@@ -293,6 +334,24 @@ int request(char message[80]) {
 void clearupline(int quantityOfUpLines) {
   for(int index = 0; index < quantityOfUpLines; index++) {
     printf("\x1b[1F"); // move line
-    printf("\x1b[2K"); // clear line
+    printf("\33[2K\r"); // clear line
   }
+}
+
+void editInput(char string[]) {
+  int stringLen = strlen(string), action;
+
+  do {
+    printf("\33[2K\r"); // clear line
+    for(int index = 0; index < stringLen; index++)
+      printf("%c", string[index]);
+
+    action = getch();
+
+    switch(action) {
+      case BACKSPACE_KEY_NUMBER:
+        string[stringLen--] = '\0';
+        break;
+    }
+  } while(action != 13);
 }
