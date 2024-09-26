@@ -1,11 +1,15 @@
+// Default
 #include <stdio.h>
 #include <windows.h>
-#include <conio.h>
 #include <ctype.h>
 
+// Conio
+#include <conio.h>
 #include "./lib/meuconio.h"
 
+// Headers
 #include "./headers/figures.h"
+#include "./headers/colors.h"
 #include "./headers/actions.h"
 
 struct Student {
@@ -24,22 +28,19 @@ struct StudentSubjects {
   float grade;
 };
 
+// Menu Options
 #define OPTIONS_FISIC_SIZE 3
 #define CHAR_OPTION_FISIC_SIZE 300
 
+// Students CONST
 #define STUDENTS_FISIC_SIZE 2
 
-#define NORMAL  "\x1B[0m"
-#define RED  "\x1B[31m"
-#define YELLOW  "\e[0;33m"
-#define GREEN  "\x1B[32m"
-#define MAGENTA  "\x1B[35m"
-#define WHITE   "\x1B[37m"
-
+// Students
 void studentsMenu(Student students[], int &studentsLogicSize);
 void createStudent(Student students[], int &studentsLogicSize);
 int findStudentIndexByRA(Student students[], int studentsLogicSize, char RA[13]);
 
+// Menu
 void subjectsMenu();
 void reportsMenu();
 void subjectsMenuTitle();
@@ -48,6 +49,7 @@ void reportsMenuTitle();
 void principalMenuTitle();
 int menu(char options[][CHAR_OPTION_FISIC_SIZE], int studentsLogicSize);
 
+// Others
 int request(char message[80]);
 void clearupline(int quantityOfUpLines);
 
