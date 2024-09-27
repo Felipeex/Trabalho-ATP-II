@@ -35,16 +35,26 @@ struct StudentSubjects {
 // Students CONST
 #define STUDENTS_FISIC_SIZE 10
 
+// Subjects CONST
+#define SUBJECTS_FISIC_SIZE 10
+
 // Students
 void studentsMenu(Student students[], int &studentsLogicSize);
 void createStudent(Student students[], int &studentsLogicSize);
-void deleteStudent(Student students[], int &studentsLogicSize);
 void queryStudent(Student students[], int &studentsLogicSize);
+void deleteStudent(Student students[], int &studentsLogicSize);
 void viewStudent(Student students);
 int findStudentIndexByRA(Student students[], int studentsLogicSize, char RA[13]);
 
+// Subject
+void subjectsMenu(Subject subjects[], int &subjectsLogicSize);
+void createSubject(Subject subjects[], int &subjectsLogicSize);
+void querySubject(Subject subjects[], int &subjectsLogicSize);
+void deleteSubject(Subject subjects[], int &subjectsLogicSize);
+void viewSubject(Subject subjects);
+int findSubjectIndexByCode(Subject subjects[], int subjectsLogicSize, int code);
+
 // Menu
-void subjectsMenu();
 void reportsMenu();
 void subjectsMenuTitle();
 void studentsMenuTitle();
@@ -67,6 +77,9 @@ int main() {
   Student students[STUDENTS_FISIC_SIZE];
   int studentsLogicSize = 0;
 
+  Subject subjects[SUBJECTS_FISIC_SIZE];
+  int subjectsLogicSize = 0;
+
   do {
     clrscr();
     principalMenuTitle();
@@ -77,7 +90,7 @@ int main() {
         studentsMenu(students, studentsLogicSize);
         break;
       case 1:
-        subjectsMenu();
+        subjectsMenu(subjects, subjectsLogicSize);
         break;
       case 2:
         reportsMenu();
@@ -146,6 +159,32 @@ void createStudent(Student students[], int &studentsLogicSize) {
   } while(studentsLogicSize < STUDENTS_FISIC_SIZE && strlen(newStudent.name) >= 1);
 }
 
+void queryStudent(Student students[], int &studentsLogicSize) {
+  char RA[13];
+  int studentIndex;
+
+  do {
+    printf(NORMAL "\nRegistro do Aluno para consulta (EX: 26.24.1354-0): ");
+    gets(RA);
+    fflush(stdin);
+
+    if (strlen(RA) >= 1) {
+      studentIndex = findStudentIndexByRA(students, studentsLogicSize, RA);
+
+      if (studentIndex >= 0) {
+        viewStudent(students[studentIndex]);
+        printf("\n\n\n");
+        getch();
+        clearupline(8);
+      } else {
+        printf(YELLOW "[AVISO] O Registro de Aluno: \"%s\" não existe.\n" NORMAL, RA);
+        getch();
+        clearupline(3);
+      }
+    }
+  } while(strlen(RA) >= 1);
+}
+
 void deleteStudent(Student students[], int &studentsLogicSize) {
   char RA[13];
   int studentIndex, index;
@@ -167,32 +206,6 @@ void deleteStudent(Student students[], int &studentsLogicSize) {
           studentsLogicSize--;
         }
         clearupline(11);
-      } else {
-        printf(YELLOW "[AVISO] O Registro de Aluno: \"%s\" não existe.\n" NORMAL, RA);
-        getch();
-        clearupline(3);
-      }
-    }
-  } while(strlen(RA) >= 1);
-}
-
-void queryStudent(Student students[], int &studentsLogicSize) {
-  char RA[13];
-  int studentIndex;
-
-  do {
-    printf(NORMAL "\nRegistro do Aluno para consulta (EX: 26.24.1354-0): ");
-    gets(RA);
-    fflush(stdin);
-
-    if (strlen(RA) >= 1) {
-      studentIndex = findStudentIndexByRA(students, studentsLogicSize, RA);
-
-      if (studentIndex >= 0) {
-        viewStudent(students[studentIndex]);
-        printf("\n\n\n");
-        getch();
-        clearupline(8);
       } else {
         printf(YELLOW "[AVISO] O Registro de Aluno: \"%s\" não existe.\n" NORMAL, RA);
         getch();
@@ -229,7 +242,7 @@ int findStudentIndexByRA(Student students[], int studentsLogicSize, char RA[13])
   return -1;
 }
 
-void subjectsMenu() {
+void subjectsMenu(Subject subjects[], int &subjectsLogicSize) {
   int subjectsMenuOption;
   char subjectsOptions[4][CHAR_OPTION_FISIC_SIZE] = { "Cadastrar", "Consultar", "Alterar", "Excluir" };
 
@@ -237,7 +250,132 @@ void subjectsMenu() {
     clrscr();
     subjectsMenuTitle();
     subjectsMenuOption = menu(subjectsOptions, 4);
+    switch(subjectsMenuOption) {
+        case 0:
+          createSubject(subjects, subjectsLogicSize);
+          break;
+        case 1:
+          querySubject(subjects, subjectsLogicSize);
+          break;
+        case 2:
+          break;
+        case 3:
+          deleteSubject(subjects, subjectsLogicSize);
+          break;
+      }
   } while(subjectsMenuOption != -1);
+}
+
+void createSubject(Subject subjects[], int &subjectsLogicSize) {
+  Subject newSubject;
+
+  do {
+    if (subjectsLogicSize < SUBJECTS_FISIC_SIZE) {
+      printf(RED "\nDados do novo aluno de número " NORMAL "#%d\n", subjectsLogicSize + 1);
+
+        printf("Nome da Disciplina (EX: ATP II): ");
+        gets(newSubject.name);
+        fflush(stdin);
+
+      if (strlen(newSubject.name) >= 1) {
+        printf("Código (EX: 210): ");
+        scanf("%d", &newSubject.code);
+
+        if (findSubjectIndexByCode(subjects, subjectsLogicSize, newSubject.code) >= 0) {
+          printf(YELLOW "[AVISO] Código: \"%d\" já está cadastrado.\n" NORMAL, newSubject.code);
+          getch();
+          clearupline(5);
+        } else {
+          if (request("Você realmente deseja criar esse disciplina?")) {
+            subjects[subjectsLogicSize] = newSubject;
+            subjectsLogicSize++;
+          }
+
+          clearupline(7);
+        }
+
+      }
+    } else { printf(RED "\n[ERROR] Não há mais capacidade de armazenamento para disciplinas." NORMAL); getch(); }
+  } while(subjectsLogicSize < STUDENTS_FISIC_SIZE && strlen(newSubject.name) >= 1);
+}
+
+void querySubject(Subject subjects[], int &subjectsLogicSize) {
+  int code, studentIndex;
+
+  do {
+    printf(NORMAL "\nCódigo da disciplina para consulta (EX: 210) ou zero para voltar: ");
+    scanf("%d", &code);
+
+    if (code > 0) {
+      studentIndex = findSubjectIndexByCode(subjects, subjectsLogicSize, code);
+
+      if (studentIndex >= 0) {
+        viewSubject(subjects[studentIndex]);
+        printf("\n\n\n");
+        getch();
+        clearupline(8);
+      } else {
+        printf(YELLOW "[AVISO] O Registro de Aluno: \"%d\" não existe.\n" NORMAL, code);
+        getch();
+        clearupline(3);
+      }
+    }
+  } while(code > 0);
+}
+
+void deleteSubject(Subject subjects[], int &subjectsLogicSize) {
+  int code, subjectIndex, index;
+
+  do {
+    printf(NORMAL "\nCódigo da disciplina para exclusão (EX: 210) ou zero para voltar: ");
+    scanf("%d", &code);
+
+    if (code > 0) {
+      subjectIndex = findSubjectIndexByCode(subjects, subjectsLogicSize, code);
+
+      if (subjectIndex >= 0) {
+        viewSubject(subjects[subjectIndex]);
+        printf("\n\n\n");
+        if (request("Você realmente deseja remover esse aluno?")) {
+          for(index = subjectIndex; index < subjectsLogicSize; index++)
+            subjects[index] = subjects[index + 1];
+          subjectsLogicSize--;
+        }
+        clearupline(11);
+      } else {
+        printf(YELLOW "[AVISO] O Registro de Aluno: \"%d\" não existe.\n" NORMAL, code);
+        getch();
+        clearupline(3);
+      }
+    }
+  } while(code > 0);
+}
+
+void viewSubject(Subject subject) {
+  int x = wherex();
+  int y = wherey();
+
+  int width = 50, height = 5;
+  frame(width, height);
+
+  gotoxy(x + (width / 2) - ((22 + 3) / 2), y + (height / 2));
+  printf("Código da Disciplina: %d", subject.code);
+
+  gotoxy(x + (width / 2) - ((20 + 3) / 2), y + (height / 2) + 1);
+  printf("Nome da Disciplina: %s", subject.name);
+}
+
+int findSubjectIndexByCode(Subject subjects[], int subjectsLogicSize, int code) {
+  int index = 0;
+
+  while(index < subjectsLogicSize && subjects[index].code != code)
+    index++;
+
+  if (index < subjectsLogicSize) {
+    return index;
+  }
+
+  return -1;
 }
 
 void reportsMenu() {
