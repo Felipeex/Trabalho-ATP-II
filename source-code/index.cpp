@@ -156,9 +156,9 @@ void queryStudent(Student students[], int &studentsLogicSize) {
 
       if (studentIndex >= 0) {
         viewStudent(students[studentIndex]);
-        printf("\n");
+        printf("\n\n\n");
         getch();
-        clearupline(3);
+        clearupline(8);
       } else {
         printf(YELLOW "[AVISO] O Registro de Aluno: \"%s\" não existe.\n" NORMAL, RA);
         getch();
@@ -169,11 +169,17 @@ void queryStudent(Student students[], int &studentsLogicSize) {
 }
 
 void viewStudent(Student student) {
-  frame(100,4);
-/*   
-  gotoxy(wherex() + 3, wherey() - 3);
-  printf("Registro do Aluno: %s\t", student.RA);
-  printf("Nome do Aluno: %s", student.name); */
+  int x = wherex();
+  int y = wherey();
+
+  int width = 50, height = 5;
+  frame(width, height);
+
+  gotoxy(x + (width / 2) - ((19 + strlen(student.RA)) / 2), y + (height / 2));
+  printf("Registro do Aluno: %s", student.RA);
+
+  gotoxy(x + (width / 2) - ((15 + strlen(student.name)) / 2), y + (height / 2) + 1);
+  printf("Nome do aluno: %s", student.name);
 }
 
 int findStudentIndexByRA(Student students[], int studentsLogicSize, char RA[13]) {
@@ -364,6 +370,7 @@ void editInput(char string[]) {
 }
 
 void frame(int width, int height) {
+  int index;
   int x = wherex();
   int y = wherey();
 
@@ -384,31 +391,26 @@ void frame(int width, int height) {
   printf("%s", ARC_UP_RIGHT);
 
   // top line
-  for (int index = x + 1; index < width + x - 1; index++) {
+  for (index = x + 1; index < width + x - 1; index++) {
     gotoxy(index, y);
     printf("%s", HORIZONTAL_LINE);
   }
 
   // bottom line
-  for (int index = x + 1; index < width + x - 1; index++) {
+  for (index = x + 1; index < width + x - 1; index++) {
     gotoxy(index, y + height);
     printf("%s", HORIZONTAL_LINE);
   }
 
   // left line
-  for (int index = y + 1; index < height + y; index++) {
+  for (index = y + 1; index < height + y; index++) {
     gotoxy(x, index);
     printf("%s", VERTICAL_LINE);
   }
 
   // right line
-  for (int index = y + 1; index < height + y; index++) {
+  for (index = y + 1; index < height + y; index++) {
     gotoxy(width, index);
     printf("%s", VERTICAL_LINE);
   }
-
-  gotoxy(x + (width / 2) - (35 / 2), y + (height / 2));
-  printf("1 2 3 4 5 6 7 8 9 10 11 12 13 14 15");
-  gotoxy(x + (width / 2) - (35 / 2), y + (height / 2) + 1);
-  printf("1 2 3 4 5 6 7 8 9 10 11 12 13 14 15");
 }
