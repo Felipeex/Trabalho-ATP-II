@@ -38,6 +38,7 @@ struct StudentSubjects {
 // Students
 void studentsMenu(Student students[], int &studentsLogicSize);
 void createStudent(Student students[], int &studentsLogicSize);
+void deleteStudent(Student students[], int &studentsLogicSize);
 void queryStudent(Student students[], int &studentsLogicSize);
 void viewStudent(Student students);
 int findStudentIndexByRA(Student students[], int studentsLogicSize, char RA[13]);
@@ -104,6 +105,9 @@ void studentsMenu(Student students[], int &studentsLogicSize) {
       case 2:
         editInput("Felipe");
         break;
+      case 3:
+        deleteStudent(students, studentsLogicSize);
+        break;
     }
   } while(studentsMenuOption != -1);
 }
@@ -140,6 +144,36 @@ void createStudent(Student students[], int &studentsLogicSize) {
       }
     } else { printf(RED "\n[ERROR] Não há mais capacidade de armazenamento para alunos." NORMAL); getch(); }
   } while(studentsLogicSize < STUDENTS_FISIC_SIZE && strlen(newStudent.name) >= 1);
+}
+
+void deleteStudent(Student students[], int &studentsLogicSize) {
+  char RA[13];
+  int studentIndex, index;
+
+  do {
+    printf(NORMAL "\nRegistro do Aluno para exclusão (EX: 26.24.1354-0): ");
+    gets(RA);
+    fflush(stdin);
+
+    if (strlen(RA) >= 1) {
+      studentIndex = findStudentIndexByRA(students, studentsLogicSize, RA);
+
+      if (studentIndex >= 0) {
+        viewStudent(students[studentIndex]);
+        printf("\n\n\n");
+        if (request("Você realmente deseja remover esse aluno?")) {
+          for(index = studentIndex; index < studentsLogicSize; index++)
+            students[index] = students[index + 1];
+          studentsLogicSize--;
+        }
+        clearupline(11);
+      } else {
+        printf(YELLOW "[AVISO] O Registro de Aluno: \"%s\" não existe.\n" NORMAL, RA);
+        getch();
+        clearupline(3);
+      }
+    }
+  } while(strlen(RA) >= 1);
 }
 
 void queryStudent(Student students[], int &studentsLogicSize) {
@@ -179,7 +213,7 @@ void viewStudent(Student student) {
   printf("Registro do Aluno: %s", student.RA);
 
   gotoxy(x + (width / 2) - ((15 + strlen(student.name)) / 2), y + (height / 2) + 1);
-  printf("Nome do aluno: %s", student.name);
+  printf("Nome do Aluno: %s", student.name);
 }
 
 int findStudentIndexByRA(Student students[], int studentsLogicSize, char RA[13]) {
