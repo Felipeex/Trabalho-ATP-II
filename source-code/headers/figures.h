@@ -12,6 +12,15 @@
 #define POINTER_SMALL '»'
 #define POINTER '>'
 
+// Box drawing
+#define HORIZONTAL_LINE "─"
+#define VERTICAL_LINE "│"
+
+#define ARC_DOWN_RIGHT "╭"
+#define ARC_DOWN_LEFT "╮"
+#define ARC_UP_LEFT "╯"
+#define ARC_UP_RIGHT "╰"
+
 // others
 #define TICK '√'
 #define CROSS '×'
