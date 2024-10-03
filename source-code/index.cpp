@@ -29,14 +29,17 @@ struct StudentSubjects {
 };
 
 // Menu Options
-#define OPTIONS_FISIC_SIZE 3
+#define OPTIONS_FISIC_SIZE 4
 #define CHAR_OPTION_FISIC_SIZE 300
 
-// Students CONST
-#define STUDENTS_FISIC_SIZE 10
+// Students CONST's
+#define STUDENTS_FISIC_SIZE 100
 
-// Subjects CONST
-#define SUBJECTS_FISIC_SIZE 10
+// Subjects CONST's
+#define SUBJECTS_FISIC_SIZE 100
+
+// StudentSubjects CONST's
+#define STUDENTS_SUBJECTS_FISIC_SIZE 100
 
 // Students
 void studentsMenu(Student students[], int &studentsLogicSize);
@@ -53,6 +56,9 @@ void querySubject(Subject subjects[], int &subjectsLogicSize);
 void deleteSubject(Subject subjects[], int &subjectsLogicSize);
 void viewSubject(Subject subjects);
 int findSubjectIndexByCode(Subject subjects[], int subjectsLogicSize, int code);
+
+// StudentSubjects
+void studentSubjectsMenu(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize);
 
 // Menu
 void reportsMenu();
@@ -72,13 +78,16 @@ int main() {
   SetConsoleOutputCP(CP_UTF8);
 
   int principalMenuOption;
-  char principalOptions[OPTIONS_FISIC_SIZE][CHAR_OPTION_FISIC_SIZE] = { "Alunos", "Disciplinas", "Relatórios" };
+  char principalOptions[OPTIONS_FISIC_SIZE][CHAR_OPTION_FISIC_SIZE] = { "Alunos", "Disciplinas", "Disciplinas dos Alunos", "Relatórios" };
 
   Student students[STUDENTS_FISIC_SIZE];
   int studentsLogicSize = 0;
 
   Subject subjects[SUBJECTS_FISIC_SIZE];
   int subjectsLogicSize = 0;
+
+  StudentSubjects studentSubjects[STUDENTS_SUBJECTS_FISIC_SIZE];
+  int studentSubjectsLogicSize = 0;
 
   do {
     clrscr();
@@ -93,6 +102,9 @@ int main() {
         subjectsMenu(subjects, subjectsLogicSize);
         break;
       case 2:
+        studentSubjectsMenu(studentSubjects, studentSubjectsLogicSize);
+        break;
+      case 4:
         reportsMenu();
         break;
     }
@@ -273,9 +285,9 @@ void createSubject(Subject subjects[], int &subjectsLogicSize) {
     if (subjectsLogicSize < SUBJECTS_FISIC_SIZE) {
       printf(RED "\nDados do novo aluno de número " NORMAL "#%d\n", subjectsLogicSize + 1);
 
-        printf("Nome da Disciplina (EX: ATP II): ");
-        gets(newSubject.name);
-        fflush(stdin);
+      printf("Nome da Disciplina (EX: ATP II): ");
+      gets(newSubject.name);
+      fflush(stdin);
 
       if (strlen(newSubject.name) >= 1) {
         printf("Código (EX: 210): ");
