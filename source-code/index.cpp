@@ -390,9 +390,20 @@ int findSubjectIndexByCode(Subject subjects[], int subjectsLogicSize, int code) 
   return -1;
 }
 
+void studentSubjectsMenu(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize) {
+  int reportsMenuOption;
+  char reportsOptions[4][CHAR_OPTION_FISIC_SIZE] = { "Registrar", "Consultar", "Alterar", "Excluir" };
+
+  do {
+    clrscr();
+    subjectsMenuTitle();
+    reportsMenuOption = menu(reportsOptions, 4);
+  } while(reportsMenuOption != -1);
+}
+
 void reportsMenu() {
   int reportsMenuOption;
-  char reportsOptions[4][CHAR_OPTION_FISIC_SIZE] = { "Cadastrar", "Consultar", "Alterar", "Excluir" };
+  char reportsOptions[4][CHAR_OPTION_FISIC_SIZE] = { "Todos os Alunos", "Disciplinas com média geral abaixo de 6.0" };
 
   do {
     clrscr();
