@@ -44,6 +44,7 @@ struct StudentSubjects {
 // Students
 void studentsMenu(Student students[], int &studentsLogicSize);
 void createStudent(Student students[], int &studentsLogicSize);
+void updateStudent(Student students[], int &studentsLogicSize);
 void queryStudent(Student students[], int &studentsLogicSize);
 void deleteStudent(Student students[], int &studentsLogicSize);
 void viewStudent(Student students);
@@ -58,7 +59,10 @@ void viewSubject(Subject subjects);
 int findSubjectIndexByCode(Subject subjects[], int subjectsLogicSize, int code);
 
 // StudentSubjects
-void studentSubjectsMenu(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize);
+void studentSubjectsMenu(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int &subjectsLogicSize);
+void createStudentSubject(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int &subjectsLogicSize);
+void queryStudentSubjects(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize);
+void deleteStudentSubject(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize);
 
 // Menu
 void reportsMenu();
@@ -69,7 +73,7 @@ void principalMenuTitle();
 int menu(char options[][CHAR_OPTION_FISIC_SIZE], int studentsLogicSize);
 
 // Others
-int request(char message[80]);
+int request(const char message[]);
 void clearupline(int quantityOfUpLines);
 void editInput(char string[]);
 void frame(int width, int height);
@@ -78,7 +82,7 @@ int main() {
   SetConsoleOutputCP(CP_UTF8);
 
   int principalMenuOption;
-  char principalOptions[OPTIONS_FISIC_SIZE][CHAR_OPTION_FISIC_SIZE] = { "Alunos", "Disciplinas", "Disciplinas dos Alunos", "Relatórios" };
+  char principalOptions[OPTIONS_FISIC_SIZE][CHAR_OPTION_FISIC_SIZE] = { "Alunos", "Disciplinas", "Disciplinas dos Aluno", "Relatórios" };
 
   Student students[STUDENTS_FISIC_SIZE];
   int studentsLogicSize = 0;
@@ -102,9 +106,16 @@ int main() {
         subjectsMenu(subjects, subjectsLogicSize);
         break;
       case 2:
-        studentSubjectsMenu(studentSubjects, studentSubjectsLogicSize);
+        studentSubjectsMenu(
+          studentSubjects,
+          studentSubjectsLogicSize,
+          students,
+          studentsLogicSize,
+          subjects,
+          subjectsLogicSize
+        );
         break;
-      case 4:
+      case 3:
         reportsMenu();
         break;
     }
@@ -128,7 +139,7 @@ void studentsMenu(Student students[], int &studentsLogicSize) {
         queryStudent(students, studentsLogicSize);
         break;
       case 2:
-        editInput("Felipe");
+        updateStudent(students, studentsLogicSize);
         break;
       case 3:
         deleteStudent(students, studentsLogicSize);
@@ -187,6 +198,32 @@ void queryStudent(Student students[], int &studentsLogicSize) {
         viewStudent(students[studentIndex]);
         printf("\n\n\n");
         getch();
+        clearupline(8);
+      } else {
+        printf(YELLOW "[AVISO] O Registro de Aluno: \"%s\" não existe.\n" NORMAL, RA);
+        getch();
+        clearupline(3);
+      }
+    }
+  } while(strlen(RA) >= 1);
+}
+
+void updateStudent(Student students[], int &studentsLogicSize) {
+  char RA[13];
+  int studentIndex, index;
+
+  do {
+    printf(NORMAL "\nRegistro do Aluno para edição (EX: 26.24.1354-0): ");
+    gets(RA);
+    fflush(stdin);
+
+    if (strlen(RA) >= 1) {
+      studentIndex = findStudentIndexByRA(students, studentsLogicSize, RA);
+
+      if (studentIndex >= 0) {
+        printf("Nome: ");
+        editInput(students[studentIndex].name);
+        printf("\n\n\n");
         clearupline(8);
       } else {
         printf(YELLOW "[AVISO] O Registro de Aluno: \"%s\" não existe.\n" NORMAL, RA);
@@ -327,7 +364,7 @@ void querySubject(Subject subjects[], int &subjectsLogicSize) {
         getch();
         clearupline(8);
       } else {
-        printf(YELLOW "[AVISO] O Registro de Aluno: \"%d\" não existe.\n" NORMAL, code);
+        printf(YELLOW "[AVISO] O Código da disciplina: \"%d\" não existe.\n" NORMAL, code);
         getch();
         clearupline(3);
       }
@@ -355,7 +392,7 @@ void deleteSubject(Subject subjects[], int &subjectsLogicSize) {
         }
         clearupline(11);
       } else {
-        printf(YELLOW "[AVISO] O Registro de Aluno: \"%d\" não existe.\n" NORMAL, code);
+        printf(YELLOW "[AVISO] O Código da disciplina: \"%d\" não existe.\n" NORMAL, code);
         getch();
         clearupline(3);
       }
@@ -390,25 +427,96 @@ int findSubjectIndexByCode(Subject subjects[], int subjectsLogicSize, int code) 
   return -1;
 }
 
-void studentSubjectsMenu(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize) {
-  int reportsMenuOption;
-  char reportsOptions[4][CHAR_OPTION_FISIC_SIZE] = { "Registrar", "Consultar", "Alterar", "Excluir" };
+void studentSubjectsMenu(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int &subjectsLogicSize) {
+  int studentSubjectsMenuOption;
+  char studentSubjectsOptions[4][CHAR_OPTION_FISIC_SIZE] = { "Registrar", "Consultar", "Alterar", "Excluir" };
 
   do {
     clrscr();
     subjectsMenuTitle();
-    reportsMenuOption = menu(reportsOptions, 4);
-  } while(reportsMenuOption != -1);
+    studentSubjectsMenuOption = menu(studentSubjectsOptions, 4);
+    switch(studentSubjectsMenuOption) {
+        case 0:
+          createStudentSubject(
+            studentSubjects,
+            studentSubjectsLogicSize,
+            students,
+            studentsLogicSize,
+            subjects,
+            subjectsLogicSize
+          );
+          break;
+        case 1:
+          queryStudentSubjects(studentSubjects, studentSubjectsLogicSize);
+          break;
+        case 2:
+          break;
+        case 3:
+          deleteStudentSubject(studentSubjects, studentSubjectsLogicSize);
+          break;
+      }
+  } while(studentSubjectsMenuOption != -1);
 }
+
+void createStudentSubject(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int &subjectsLogicSize) {
+  int studentIndex, code;
+  char RA[13];
+  StudentSubjects newStudentSubject;
+
+  do {
+    if (studentSubjectsLogicSize < STUDENTS_SUBJECTS_FISIC_SIZE) {
+      printf(NORMAL "\nRegistro do Aluno para o Registro (EX: 26.24.1354-0): ");
+      gets(RA);
+      fflush(stdin);
+
+      if (strlen(RA) >= 1) {
+        studentIndex = findStudentIndexByRA(students, studentsLogicSize, RA);
+
+        if (studentIndex >= 0) {
+          
+          printf(NORMAL "\nCódigo da disciplina para o Registro (EX: 210): ");
+          scanf("%d", &code);
+
+          if (code > 0) {
+            studentIndex = findSubjectIndexByCode(subjects, subjectsLogicSize, code);
+
+            if (studentIndex >= 0) {
+              
+            } else {
+              printf(YELLOW "[AVISO] O Código da disciplina: \"%d\" não existe.\n" NORMAL, code);
+              getch();
+              clearupline(3);
+            }
+          }
+        } else {
+          printf(YELLOW "[AVISO] O Registro de Aluno: \"%s\" não existe.\n" NORMAL, RA);
+          getch();
+          clearupline(3);
+        }
+      }
+    } else { printf(RED "\n[ERROR] Não há mais capacidade de armazenamento para alunos." NORMAL); getch(); }
+  } while(studentSubjectsLogicSize < STUDENTS_SUBJECTS_FISIC_SIZE && strlen(newStudent.name) >= 1);
+}
+
+void queryStudentSubjects(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize) {}
+void deleteStudentSubject(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize) {}
 
 void reportsMenu() {
   int reportsMenuOption;
-  char reportsOptions[4][CHAR_OPTION_FISIC_SIZE] = { "Todos os Alunos", "Disciplinas com média geral abaixo de 6.0" };
+  char reportsOptions[7][CHAR_OPTION_FISIC_SIZE] = { 
+    "Consultar Alunos",
+    "Consultar Disciplinas",
+    "Consultar Disciplinas dos Alunos",
+    "Alunos reprovados em 2 ou mais disciplinas",
+    "Alunos cujo nome começa com uma determinada letra",
+    "Disciplinas que contêm um termo (palavra) específico.",
+    "Disciplinas com média geral abaixo de 6.0"
+  };
 
   do {
     clrscr();
     reportsMenuTitle();
-    reportsMenuOption = menu(reportsOptions, 4);
+    reportsMenuOption = menu(reportsOptions, 7);
   } while(reportsMenuOption != -1);
 }
 
@@ -446,7 +554,7 @@ int menu(char options[][CHAR_OPTION_FISIC_SIZE], int quantityOfOptions) {
       break;
     }
 
-  } while(action != 27 && action != 13);
+  } while(action != ESC_KEY_NUMBER && action != ENTER_KEY_NUMBER);
 
   printf("\e[?25h"); // show cursor
   textcolor(15);
@@ -471,7 +579,7 @@ void principalMenuTitle() {
   printf(" \\____$$ | \\_______|\\__|       \\_______|\\__|  \\__| \\_______|\\__| \\_______|\\__| \\__| \\__| \\_______|\\__|  \\__|  \\____/  \\______/ \n");
   printf("$$\\   $$ |                                                                                                                     \n");
   printf("\\$$$$$$  |                                                                                                                     \n");
-  printf(" \\______|                                                                                                                     \n\n\n\n\n");
+  printf(" \\______|                                                                                                                     \n\n\n\n\n\n");
   textcolor(15);
 }
 
@@ -516,11 +624,11 @@ void reportsMenuTitle() {
   printf("$$  __$$< $$$$$$$$ |$$ | $$$$$$$ | $$ |    $$ /  $$ |$$ |  \\__|$$ |$$ /  $$ |\\$$$$$$\\  \n");
   printf("$$ |  $$ |$$   ____|$$ |$$  __$$ | $$ |$$\\ $$ |  $$ |$$ |      $$ |$$ |  $$ | \\____$$\\ \n");
   printf("$$ |  $$ |\\$$$$$$$\\ $$ |\\$$$$$$$ | \\$$$$  |\\$$$$$$  |$$ |      $$ |\\$$$$$$  |$$$$$$$  |\n");
-  printf("\\__|  \\__| \\_______|\\__| \\_______|  \\____/  \\______/ \\__|      \\__| \\______/ \\_______/ \n\n\n\n\n\n");
+  printf("\\__|  \\__| \\_______|\\__| \\_______|  \\____/  \\______/ \\__|      \\__| \\______/ \\_______/ \n\n\n\n\n\n\n\n\n");
   textcolor(15);
 }
 
-int request(char message[80]) {
+int request(const char message[80]) {
   printf("\n%s" GREEN "\n[S] Sim" RED " [N] Não\n" NORMAL, message);
 
   int answer;
@@ -546,22 +654,26 @@ void clearupline(int quantityOfUpLines) {
 void editInput(char string[]) {
   int stringLen = strlen(string), action;
 
-  do {
-    printf("\33[2K\r"); // clear line
-    for(int index = 0; index < stringLen; index++)
-      printf("%c", string[index]);
+  printf("%s", string);
 
+  do {
     action = getch();
 
     switch(action) {
       case BACKSPACE_KEY_NUMBER:
-        stringLen--;
+        if (stringLen > 0) {
+          stringLen--;
+          printf("\b \b"); // back cursor and delete
+        }
         break;
-      case 97:
-        strcat(string, "a");
-        break;
+      default:
+        putchar(action);
+        string[stringLen] = action;
+        stringLen++;
     }
-  } while(action != 13);
+  } while(action != ENTER_KEY_NUMBER);
+
+  string[stringLen] = '\0';
 }
 
 void frame(int width, int height) {
