@@ -5,3 +5,4 @@
 #define GREEN  "\x1B[32m"
 #define MAGENTA  "\x1B[35m"
 #define WHITE   "\x1B[37m"
+#define CYAN   "\e[0;36m"
