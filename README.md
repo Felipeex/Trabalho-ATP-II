@@ -8,3 +8,5 @@ https://www.reddit.com/r/C_Programming/comments/502xun/how_do_i_clear_a_line_on_
 https://en.wikipedia.org/wiki/ANSI_escape_code
 https://en.wikipedia.org/wiki/Box-drawing_characters
 https://stackoverflow.com/questions/12821005/how-to-stop-text-color-function-under-conio-h-in-c-to-align-the-output-to-right
+https://stackoverflow.com/questions/822323/how-to-generate-a-random-int-in-c
+https://www.geeksforgeeks.org/c-rand-function/

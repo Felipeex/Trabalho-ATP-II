@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <windows.h>
 #include <ctype.h>
+#include <stdlib.h> 
 
 // Conio
 #include <conio.h>
@@ -29,7 +30,7 @@ struct StudentSubjects {
 };
 
 // Menu Options
-#define OPTIONS_FISIC_SIZE 4
+#define OPTIONS_FISIC_SIZE 5
 #define CHAR_OPTION_FISIC_SIZE 300
 
 // Students CONST's
@@ -49,6 +50,7 @@ void queryStudent(Student students[], int studentsLogicSize);
 void deleteStudent(Student students[], int &studentsLogicSize);
 void viewStudent(Student students);
 int findStudentIndexByRA(Student students[], int studentsLogicSize, char RA[13]);
+void studentsMenuTitle();
 
 // Subject
 void subjectsMenu(Subject subjects[], int &subjectsLogicSize);
@@ -57,21 +59,24 @@ void querySubject(Subject subjects[], int subjectsLogicSize);
 void deleteSubject(Subject subjects[], int &subjectsLogicSize);
 void viewSubject(Subject subjects);
 int findSubjectIndexByCode(Subject subjects[], int subjectsLogicSize, int code);
+void subjectsMenuTitle();
 
 // StudentSubjects
 void studentSubjectsMenu(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
 void createStudentSubject(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
-void queryStudentSubjects(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize);
+void queryStudentSubjects(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
 void deleteStudentSubject(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize);
-void viewStudentSubject(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
-int findStudentIndexInStudentSubject(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, char studentRA[13]);
+void viewStudentSubject(StudentSubjects studentSubjects, Student student, int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
+int findStudentIndex(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, char studentRA[13]);
 int findStudentSubjectIndex(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, char studentRA[13], int subjectCode);
 
 // Menu
 void reportsMenu();
-void subjectsMenuTitle();
-void studentsMenuTitle();
 void reportsMenuTitle();
+
+void configMenu(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, Student students[], int &studentsLogicSize, Subject subjects[], int &subjectsLogicSize);
+void configMenuTitle();
+
 void principalMenuTitle();
 int menu(char options[][CHAR_OPTION_FISIC_SIZE], int studentsLogicSize);
 
@@ -85,7 +90,7 @@ int main() {
   SetConsoleOutputCP(CP_UTF8);
 
   int principalMenuOption;
-  char principalOptions[OPTIONS_FISIC_SIZE][CHAR_OPTION_FISIC_SIZE] = { "Estudantes", "Disciplinas", "Disciplinas dos Estudante", "Relatórios" };
+  char principalOptions[OPTIONS_FISIC_SIZE][CHAR_OPTION_FISIC_SIZE] = { "Estudantes", "Disciplinas", "Disciplinas dos Estudante", "Relatórios", "Configuração" };
 
   Student students[STUDENTS_FISIC_SIZE];
   int studentsLogicSize = 0;
@@ -120,6 +125,16 @@ int main() {
         break;
       case 3:
         reportsMenu();
+        break;
+      case 4:
+        configMenu(
+          studentSubjects,
+          studentSubjectsLogicSize,
+          students,
+          studentsLogicSize,
+          subjects,
+          subjectsLogicSize
+        );
         break;
     }
   } while(principalMenuOption != -1);
@@ -270,13 +285,13 @@ void viewStudent(Student student) {
   int x = wherex();
   int y = wherey();
 
-  int width = 50, height = 5;
+  int width = 65, height = 5;
   frame(width, height);
 
-  gotoxy(x + (width / 2) - ((19 + strlen(student.RA)) / 2), y + (height / 2));
+  gotoxy(x + (width / 2) - ((23 + strlen(student.RA)) / 2), y + (height / 2));
   printf("Registro do Estudante: %s", student.RA);
 
-  gotoxy(x + (width / 2) - ((15 + strlen(student.name)) / 2), y + (height / 2) + 1);
+  gotoxy(x + (width / 2) - ((19 + strlen(student.name)) / 2), y + (height / 2) + 1);
   printf("Nome do Estudante: %s", student.name);
 }
 
@@ -450,7 +465,14 @@ void studentSubjectsMenu(StudentSubjects studentSubjects[], int &studentSubjects
           );
           break;
         case 1:
-          queryStudentSubjects(studentSubjects, studentSubjectsLogicSize);
+          queryStudentSubjects(
+            studentSubjects,
+            studentSubjectsLogicSize,
+            students,
+            studentsLogicSize,
+            subjects,
+            subjectsLogicSize
+          );
           break;
         case 2:
           break;
@@ -505,9 +527,9 @@ void createStudentSubject(StudentSubjects studentSubjects[], int &studentSubject
   } while(studentSubjectsLogicSize < STUDENTS_SUBJECTS_FISIC_SIZE && strlen(newStudentSubject.studentRA) >= 1);
 }
 
-void queryStudentSubjects(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize) {
+void queryStudentSubjects(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize) {
   char studentRA[13];
-  int studentIndexInSubject, studentSubjectIndex, subjectCode;
+  int studentIndex, studentSubjectIndex, subjectCode;
 
   do {
     printf(NORMAL "\nRegistro do Estudante para consulta de suas materias (EX: 26.24.1354-0): ");
@@ -515,16 +537,16 @@ void queryStudentSubjects(StudentSubjects studentSubjects[], int &studentSubject
     fflush(stdin);
 
     if (strlen(studentRA) >= 1) {
-      studentIndexInSubject = findStudentIndexInStudentSubject(studentSubjects, studentSubjectsLogicSize, studentRA);
+      studentIndex = findStudentIndex(studentSubjects, studentSubjectsLogicSize, studentRA);
 
-      if (studentIndexInSubject >= 0) {
+      if (studentIndex >= 0) {
         printf(NORMAL "\nCódigo da Disciplina (EX: 210): ");
         scanf("%d", &subjectCode);
 
         studentSubjectIndex = findStudentSubjectIndex(studentSubjects, studentSubjectsLogicSize, studentRA, subjectCode);
 
         if (studentSubjectIndex >= 0) {
-          printf("%d\n", studentSubjectIndex);
+          viewStudentSubject(studentSubjects[studentSubjectIndex], students[studentIndex], studentsLogicSize, subjects, subjectsLogicSize);
           getch();
         } else {
           printf(YELLOW "[AVISO] O Registro de Estudante: \"%s\" não tem a disciplina de código \"%d\" \n" NORMAL, studentRA, subjectCode);
@@ -542,9 +564,14 @@ void queryStudentSubjects(StudentSubjects studentSubjects[], int &studentSubject
 
 void deleteStudentSubject(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize) {}
 
-void viewStudentSubject(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize) {}
+void viewStudentSubject(StudentSubjects studentSubjects, Student student, int studentsLogicSize, Subject subjects[], int subjectsLogicSize) {
+  int subjectIndex = findSubjectIndexByCode(subjects, studentsLogicSize, studentSubjects.subjectCode);
 
-int findStudentIndexInStudentSubject(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, char studentRA[13]) {
+  printf("RA: %s\t Nome: %s\n", studentSubjects.studentRA, student.name);
+  printf("Disciplina: %d - %s\t Nota: %f\t Situação: Não sei ainda", studentSubjects.subjectCode, subjects[subjectIndex].name, studentSubjects.grade);
+}
+
+int findStudentIndex(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, char studentRA[13]) {
   int index = 0;
 
   while(index < studentSubjectsLogicSize && stricmp(studentSubjects[index].studentRA, studentRA))
@@ -587,6 +614,225 @@ void reportsMenu() {
     reportsMenuTitle();
     reportsMenuOption = menu(reportsOptions, 7);
   } while(reportsMenuOption != -1);
+}
+
+void configMenu(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, Student students[], int &studentsLogicSize, Subject subjects[], int &subjectsLogicSize) {
+  int configMenuOption, indexToSubject, indexToStudent;
+  char configOptions[1][CHAR_OPTION_FISIC_SIZE] = { 
+    "Inserir dados falsos."
+  };
+
+  do {
+    clrscr();
+    configMenuTitle();
+    configMenuOption = menu(configOptions, 1);
+    if (configMenuOption >= 0) {
+      if (request("Você realmente deseja adicionar os dados falsos?")) {
+        // add students
+        strcpy(students[studentsLogicSize].RA, "26.24.1819-7");
+        strcpy(students[studentsLogicSize++].name, "Andre Junior Da Silva Santos");
+
+        strcpy(students[studentsLogicSize].RA, "26.23.1864-4");
+        strcpy(students[studentsLogicSize++].name, "Andressa Felisberto Ferreira Diniz");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.1194-6");
+        strcpy(students[studentsLogicSize++].name, "Andrey Pereira Miotto");
+
+        strcpy(students[studentsLogicSize].RA, "26.20.1281-2");
+        strcpy(students[studentsLogicSize++].name, "Arthur Torres De Souza");
+
+        strcpy(students[studentsLogicSize].RA, "26.23.1792-9");
+        strcpy(students[studentsLogicSize++].name, "Bhreno Gabriel Moraes Ferreira");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.1250-0");
+        strcpy(students[studentsLogicSize++].name, "Bryan Dos Santos Cruz");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.1675-5");
+        strcpy(students[studentsLogicSize++].name, "Caio Victor Rodrigues");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.1395-2");
+        strcpy(students[studentsLogicSize++].name, "Caroliny Vitoria Martins");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.12438-0");
+        strcpy(students[studentsLogicSize++].name, "Christiano Rodrigues Galindo De Oliveira");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.13167-7");
+        strcpy(students[studentsLogicSize++].name, "Daniel Lopes Tavares");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.13051-5");
+        strcpy(students[studentsLogicSize++].name, "Douglas MatiazzI Aguiar");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.11741-2");
+        strcpy(students[studentsLogicSize++].name, "Erika Tanoue Tarumoto");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.14622-5");
+        strcpy(students[studentsLogicSize++].name, "Felipe Alves Barbosa");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.13787-3");
+        strcpy(students[studentsLogicSize++].name, "Felipe Furlan Santos");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.13540-5");
+        strcpy(students[studentsLogicSize++].name, "Felipe Lima Santos");
+
+        strcpy(students[studentsLogicSize].RA, "26.23.10104-3");
+        strcpy(students[studentsLogicSize++].name, "Gabriel Da Silva Ferrari");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.13655-2");
+        strcpy(students[studentsLogicSize++].name, "Gabriel De Carvalho Mariano");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.13515-7");
+        strcpy(students[studentsLogicSize++].name, "Gabriel Delanhese Lorente");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.13574-6");
+        strcpy(students[studentsLogicSize++].name, "Gabriel Oliveira Mora Da Silva");
+
+        strcpy(students[studentsLogicSize].RA, "26.32.1300-0");
+        strcpy(students[studentsLogicSize++].name, "Giovane Jose Capeloti");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.12136-3");
+        strcpy(students[studentsLogicSize++].name, "Guilherme Henrique Santos Scarmagnani");
+
+        strcpy(students[studentsLogicSize].RA, "26.32.0690-0");
+        strcpy(students[studentsLogicSize++].name, "Gustavo Martins Goncalves");
+
+        strcpy(students[studentsLogicSize].RA, "26.32.0667-4");
+        strcpy(students[studentsLogicSize++].name, "Gustavo Scorpioni Mantovanelli Trevisanuto");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.13043-9");
+        strcpy(students[studentsLogicSize++].name, "Heitor Franzo Justo");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.11962-8");
+        strcpy(students[studentsLogicSize++].name, "Heitor Hayashi Ferrairo");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.12020-8");
+        strcpy(students[studentsLogicSize++].name, "Humberto Alcantara Arruda");
+
+        strcpy(students[studentsLogicSize].RA, "26.22.8386-0");
+        strcpy(students[studentsLogicSize++].name, "Jessica Pinheiro Da Silva");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.11997-4");
+        strcpy(students[studentsLogicSize++].name, "Joao Emanuel Santos Silva");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.11911-3");
+        strcpy(students[studentsLogicSize++].name, "Jose Carlos Goncalves Neto");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.11733-0");
+        strcpy(students[studentsLogicSize++].name, "Luane De Paula Kasprzak");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.13531-8");
+        strcpy(students[studentsLogicSize++].name, "Lucas Augusto Correia Da Silva");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.12284-1");
+        strcpy(students[studentsLogicSize++].name, "Lucas Filipe Camargo Giraldino");
+
+        strcpy(students[studentsLogicSize].RA, "26.23.1687-2");
+        strcpy(students[studentsLogicSize++].name, "Luigi Sardelari Scaliante");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.12128-8");
+        strcpy(students[studentsLogicSize++].name, "Luis Gustavo Goncalves Silva");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.11083-5");
+        strcpy(students[studentsLogicSize++].name, "Luiz Fabio Torres Justi");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.11768-8");
+        strcpy(students[studentsLogicSize++].name, "Matheus Borges Gabriel");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.13868-5");
+        strcpy(students[studentsLogicSize++].name, "Matheus CavalI De Paulo");
+
+        strcpy(students[studentsLogicSize].RA, "26.32.1017-3");
+        strcpy(students[studentsLogicSize++].name, "Matheus De Oliveira Lima");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.13264-5");
+        strcpy(students[studentsLogicSize++].name, "Murilo Henrique Santos Da Silva");
+
+        strcpy(students[studentsLogicSize].RA, "26.32.0282-1");
+        strcpy(students[studentsLogicSize++].name, "Murilo Santana Alcantara");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.12594-1");
+        strcpy(students[studentsLogicSize++].name, "Nicolas Lima Gomes Conehero");
+
+        strcpy(students[studentsLogicSize].RA, "26.32.0983-0");
+        strcpy(students[studentsLogicSize++].name, "Paulo Rodrigues Da Rocha");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.13116-6");
+        strcpy(students[studentsLogicSize++].name, "Pedro Henrique Marteli Bolque");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.12942-4");
+        strcpy(students[studentsLogicSize++].name, "Pedro Henrique Trevisi Strabelli");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.11920-5");
+        strcpy(students[studentsLogicSize++].name, "Pedro Todesco Bezerra Rocha");
+
+        strcpy(students[studentsLogicSize].RA, "26.32.0762-5");
+        strcpy(students[studentsLogicSize++].name, "Rafael Fritschy Hain");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.13361-6");
+        strcpy(students[studentsLogicSize++].name, "Rafael Lorente Padovan");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.11601-4");
+        strcpy(students[studentsLogicSize++].name, "Renan Gustavo Santos Silva");
+
+        strcpy(students[studentsLogicSize].RA, "26.32.0681-5");
+        strcpy(students[studentsLogicSize++].name, "Renan Henrique Pereira Lira");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.1295-0");
+        strcpy(students[studentsLogicSize++].name, "Rodolpho Moreira Coller");
+
+        strcpy(students[studentsLogicSize].RA, "26.23.1031-7");
+        strcpy(students[studentsLogicSize++].name, "Tatiane Camille Terencio Benedito");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.1283-7");
+        strcpy(students[studentsLogicSize++].name, "Thiago Marques Cristino");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.1388-8");
+        strcpy(students[studentsLogicSize++].name, "Victor Eiji Leao Sassaki");
+
+        strcpy(students[studentsLogicSize].RA, "26.24.1310-0");
+        strcpy(students[studentsLogicSize++].name, "Vitor Micael De Araujo");
+
+        strcpy(students[studentsLogicSize].RA, "26.23.2073-8");
+        strcpy(students[studentsLogicSize++].name, "Vitor Trevelin Silva");
+
+        strcpy(students[studentsLogicSize].RA, "26.23.0460-0");
+        strcpy(students[studentsLogicSize++].name, "Yan Prioste Oliveira");
+
+        // add subjects
+        subjects[subjectsLogicSize].code = 210;
+        strcpy(subjects[subjectsLogicSize++].name, "Algoritmos e técnicas de programação II");
+
+        subjects[subjectsLogicSize].code = 110;
+        strcpy(subjects[subjectsLogicSize++].name, "Ambientes de programação II");
+
+        subjects[subjectsLogicSize].code = 250;
+        strcpy(subjects[subjectsLogicSize++].name, "Arquitetura de computadores");
+
+        subjects[subjectsLogicSize].code = 300;
+        strcpy(subjects[subjectsLogicSize++].name, "Ciência de dados");
+
+        subjects[subjectsLogicSize].code = 220;
+        strcpy(subjects[subjectsLogicSize++].name, "Fundamentos de sistemas de informação");
+
+        subjects[subjectsLogicSize].code = 443;
+        strcpy(subjects[subjectsLogicSize++].name, "Gestão financeira");
+
+        subjects[subjectsLogicSize].code = 341;
+        strcpy(subjects[subjectsLogicSize++].name, "Sala do coordenador");
+
+        for (indexToSubject = 0; indexToSubject < subjectsLogicSize; indexToSubject++)
+          for (indexToStudent = 0; indexToStudent < studentsLogicSize; indexToStudent++) {
+            printf("%s\n", students[indexToStudent].RA);
+            getch();
+            strcpy(studentSubjects[studentSubjectsLogicSize].studentRA, students[indexToStudent].RA);
+            studentSubjects[studentSubjectsLogicSize].subjectCode = subjects[indexToSubject].code;
+            // studentSubjects[studentSubjectsLogicSize].grade = rand() % 10;
+/*             studentSubjectsLogicSize++; */
+          }
+
+        configMenuOption = -1;
+      }
+    }
+  } while(configMenuOption != -1);
 }
 
 int menu(char options[][CHAR_OPTION_FISIC_SIZE], int quantityOfOptions) {
@@ -648,7 +894,7 @@ void principalMenuTitle() {
   printf(" \\____$$ | \\_______|\\__|       \\_______|\\__|  \\__| \\_______|\\__| \\_______|\\__| \\__| \\__| \\_______|\\__|  \\__|  \\____/  \\______/ \n");
   printf("$$\\   $$ |                                                                                                                     \n");
   printf("\\$$$$$$  |                                                                                                                     \n");
-  printf(" \\______|                                                                                                                     \n\n\n\n\n\n");
+  printf(" \\______|                                                                                                                     \n\n\n\n\n\n\n");
   textcolor(15);
 }
 
@@ -694,6 +940,23 @@ void reportsMenuTitle() {
   printf("$$ |  $$ |$$   ____|$$ |$$  __$$ | $$ |$$\\ $$ |  $$ |$$ |      $$ |$$ |  $$ | \\____$$\\ \n");
   printf("$$ |  $$ |\\$$$$$$$\\ $$ |\\$$$$$$$ | \\$$$$  |\\$$$$$$  |$$ |      $$ |\\$$$$$$  |$$$$$$$  |\n");
   printf("\\__|  \\__| \\_______|\\__| \\_______|  \\____/  \\______/ \\__|      \\__| \\______/ \\_______/ \n\n\n\n\n\n\n\n\n");
+  textcolor(15);
+}
+
+void configMenuTitle() {
+  clrscr();
+  textcolor(2);
+  printf("                               $$$$$$\\  $$\\           \n");
+  printf("                              $$  __$$\\ \\__|          \n");
+  printf(" $$$$$$$\\  $$$$$$\\  $$$$$$$\\  $$ /  \\__|$$\\  $$$$$$\\  \n");
+  printf("$$  _____|$$  __$$\\ $$  __$$\\ $$$$\\     $$ |$$  __$$\\ \n");
+  printf("$$ /      $$ /  $$ |$$ |  $$ |$$  _|    $$ |$$ /  $$ |\n");
+  printf("$$ |      $$ |  $$ |$$ |  $$ |$$ |      $$ |$$ |  $$ |\n");
+  printf("\\$$$$$$$\\ \\$$$$$$  |$$ |  $$ |$$ |      $$ |\\$$$$$$$ |\n");
+  printf(" \\_______| \\______/ \\__|  \\__|\\__|      \\__| \\____$$ |\n");
+  printf("                                            $$\\   $$ |\n");
+  printf("                                            \\$$$$$$  |\n");
+  printf("                                             \\______/ \n\n\n");
   textcolor(15);
 }
 
