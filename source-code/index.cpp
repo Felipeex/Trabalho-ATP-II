@@ -791,10 +791,10 @@ void reportsMenu(StudentSubjects studentSubjects[], int studentSubjectsLogicSize
 }
 
 void subjectMean(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize) {
+  printf("\n");
   for (int subjectIndex = 0; subjectIndex < subjectsLogicSize; subjectIndex++) {
     int countStudents = 0;
-    int countGrade = 0;
-    int meanGrade = 0;
+    float countGrade = 0, meanGrade = 0;
 
     for (int studentSubjectsIndex = 0; studentSubjectsIndex < studentSubjectsLogicSize; studentSubjectsIndex++) {
       if (studentSubjects[studentSubjectsIndex].subjectCode == subjects[subjectIndex].code) {
@@ -805,7 +805,9 @@ void subjectMean(StudentSubjects studentSubjects[], int studentSubjectsLogicSize
 
     meanGrade = countGrade / countStudents;
 
-    printf("%d\n", meanGrade);
+    printf(CYAN "Disciplina: " NORMAL "%d - %s", subjects[subjectIndex].code, subjects[subjectIndex].name);
+    gotoxy(65, wherey());
+    printf(CYAN "Média Geral: " NORMAL "%.2f\n", meanGrade);
   }
   
   getch();
