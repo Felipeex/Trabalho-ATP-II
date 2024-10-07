@@ -12,3 +12,5 @@ https://stackoverflow.com/questions/12821005/how-to-stop-text-color-function-und
 https://stackoverflow.com/questions/822323/how-to-generate-a-random-int-in-c
 https://www.geeksforgeeks.org/c-rand-function/
 https://www.reddit.com/r/cpp_questions/comments/averi0/how_do_you_generate_random_decimal_numbers_like/
+https://stackoverflow.com/questions/27303062/strstr-function-like-that-ignores-upper-or-lower-case
+https://learn.microsoft.com/pt-br/windows/win32/api/shlwapi/nf-shlwapi-strstria?redirectedfrom=MSDN

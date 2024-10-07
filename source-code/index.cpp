@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <ctype.h>
 #include <stdlib.h> 
+#include <shlwapi.h>
 
 // Conio
 #include <conio.h>
@@ -75,6 +76,7 @@ int findStudentSubjectIndex(StudentSubjects studentSubjects[], int studentSubjec
 // Reports
 void reportsMenuTitle();
 void reportsMenu(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
+void searchSubject(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
 void subjectMean(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
 
 // Menu
@@ -776,6 +778,16 @@ void reportsMenu(StudentSubjects studentSubjects[], int studentSubjectsLogicSize
     reportsMenuOption = menu(reportsOptions, 4);
 
     switch(reportsMenuOption) {
+      case 2:
+        searchSubject(
+          studentSubjects,
+          studentSubjectsLogicSize,
+          students,
+          studentsLogicSize,
+          subjects,
+          subjectsLogicSize
+        );
+        break;
       case 3:
         subjectMean(
           studentSubjects,
@@ -788,6 +800,27 @@ void reportsMenu(StudentSubjects studentSubjects[], int studentSubjectsLogicSize
         break;
     }
   } while(reportsMenuOption != -1);
+}
+
+void searchSubject(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize) {
+  char word[100];
+  int countSearched = 0;
+  
+  printf("\nTermo (palavra) para pesquisa: ");
+  gets(word);
+
+  for (int subjectIndex = 0; subjectIndex < subjectsLogicSize; subjectIndex++) {
+    if (StrStrIA(subjects[subjectIndex].name, word)) {
+      printf(CYAN "Disciplina: " NORMAL "%d - %s\n", subjects[subjectIndex].code, subjects[subjectIndex].name);
+      countSearched++;
+    }
+  }
+
+  if (countSearched <= 0) {
+    printf("Nada encontrado com a palavras \"%s\" \n", word);
+  }
+
+  getch();
 }
 
 void subjectMean(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize) {
