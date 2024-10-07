@@ -76,6 +76,7 @@ int findStudentSubjectIndex(StudentSubjects studentSubjects[], int studentSubjec
 // Reports
 void reportsMenuTitle();
 void reportsMenu(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
+void DisapproveStudentInSubjects(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
 void searchStudent(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
 void searchSubject(Subject subjects[], int subjectsLogicSize);
 void subjectMean(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Subject subjects[], int subjectsLogicSize);
@@ -779,6 +780,16 @@ void reportsMenu(StudentSubjects studentSubjects[], int studentSubjectsLogicSize
     reportsMenuOption = menu(reportsOptions, 4);
 
     switch(reportsMenuOption) {
+      case 0:
+        DisapproveStudentInSubjects(
+          studentSubjects,
+          studentSubjectsLogicSize,
+          students,
+          studentsLogicSize,
+          subjects,
+          subjectsLogicSize
+        );
+        break;
       case 1:
         searchStudent(
           studentSubjects,
@@ -805,6 +816,46 @@ void reportsMenu(StudentSubjects studentSubjects[], int studentSubjectsLogicSize
         break;
     }
   } while(reportsMenuOption != -1);
+}
+
+void DisapproveStudentInSubjects(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize) {
+  int studentIndex, subjectIndex, studentSubjectsIndex, countDisapproves = 0;
+
+  printf("\n");
+  for (studentIndex = 0; studentIndex < studentsLogicSize; studentIndex++) {
+    for (studentSubjectsIndex = 0; studentSubjectsIndex < studentSubjectsLogicSize; studentSubjectsIndex++) {
+      if (!stricmp(students[studentIndex].RA, studentSubjects[studentSubjectsIndex].studentRA)) {
+        if (studentSubjects[studentSubjectsIndex].grade < 6)
+          countDisapproves++;
+      }
+    }
+
+    if (countDisapproves >= 2) {
+      for (studentIndex = 0; studentIndex < studentsLogicSize; studentIndex++) {
+        printf("\n");
+        printf(CYAN "RA: " NORMAL "%s  " CYAN "Nome: " NORMAL "%s\n", students[studentIndex].RA, students[studentIndex].name);
+
+        for (studentSubjectsIndex = 0; studentSubjectsIndex < studentSubjectsLogicSize; studentSubjectsIndex++) {
+          if (!stricmp(students[studentIndex].RA, studentSubjects[studentSubjectsIndex].studentRA) && studentSubjects[studentSubjectsIndex].grade < 6) {
+            subjectIndex = findSubjectIndexByCode(subjects, subjectsLogicSize, studentSubjects[studentSubjectsIndex].subjectCode);
+            printf(CYAN "Disciplina: " NORMAL "%d - %s", subjects[subjectIndex].code, subjects[subjectIndex].name, studentSubjects[studentSubjectsIndex].grade);
+            gotoxy(65, wherey());
+            printf(CYAN "Nota: " NORMAL "%.2f\t", studentSubjects[studentSubjectsIndex].grade);
+            gotoxy(80, wherey());
+            printf(CYAN "Situação: " NORMAL);
+
+            if (studentSubjects[studentSubjectsIndex].grade >= 6) {
+              printf(GREEN "APROVADO\n" NORMAL);
+            } else {
+              printf(RED "REPROVADO\n" NORMAL);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  getch();
 }
 
 void searchStudent(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize) {
