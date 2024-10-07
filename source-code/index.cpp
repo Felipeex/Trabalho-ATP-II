@@ -76,8 +76,9 @@ int findStudentSubjectIndex(StudentSubjects studentSubjects[], int studentSubjec
 // Reports
 void reportsMenuTitle();
 void reportsMenu(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
-void searchSubject(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
-void subjectMean(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
+void searchStudent(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
+void searchSubject(Subject subjects[], int subjectsLogicSize);
+void subjectMean(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Subject subjects[], int subjectsLogicSize);
 
 // Menu
 void configMenu(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, Student students[], int &studentsLogicSize, Subject subjects[], int &subjectsLogicSize);
@@ -778,12 +779,18 @@ void reportsMenu(StudentSubjects studentSubjects[], int studentSubjectsLogicSize
     reportsMenuOption = menu(reportsOptions, 4);
 
     switch(reportsMenuOption) {
-      case 2:
-        searchSubject(
+      case 1:
+        searchStudent(
           studentSubjects,
           studentSubjectsLogicSize,
           students,
           studentsLogicSize,
+          subjects,
+          subjectsLogicSize
+        );
+        break;
+      case 2:
+        searchSubject(
           subjects,
           subjectsLogicSize
         );
@@ -792,8 +799,6 @@ void reportsMenu(StudentSubjects studentSubjects[], int studentSubjectsLogicSize
         subjectMean(
           studentSubjects,
           studentSubjectsLogicSize,
-          students,
-          studentsLogicSize,
           subjects,
           subjectsLogicSize
         );
@@ -802,32 +807,70 @@ void reportsMenu(StudentSubjects studentSubjects[], int studentSubjectsLogicSize
   } while(reportsMenuOption != -1);
 }
 
-void searchSubject(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize) {
-  char word[100];
+void searchStudent(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize) {
+  char letter;
+  int studentIndex, subjectIndex, studentSubjectsIndex;
+
+  printf("\nLetra para pesquisa: ");
+  letter = getche();
+  
+  printf("\n");
+  for (studentIndex = 0; studentIndex < studentsLogicSize; studentIndex++) {
+    if (tolower(students[studentIndex].name[0]) == tolower(letter)) {
+      printf("\n");
+      printf(CYAN "RA: " NORMAL "%s  " CYAN "Nome: " NORMAL "%s\n", students[studentIndex].RA, students[studentIndex].name);
+
+      for (studentSubjectsIndex = 0; studentSubjectsIndex < studentSubjectsLogicSize; studentSubjectsIndex++) {
+        if (!stricmp(students[studentIndex].RA, studentSubjects[studentSubjectsIndex].studentRA)) {
+          subjectIndex = findSubjectIndexByCode(subjects, subjectsLogicSize, studentSubjects[studentSubjectsIndex].subjectCode);
+          printf(CYAN "Disciplina: " NORMAL "%d - %s", subjects[subjectIndex].code, subjects[subjectIndex].name, studentSubjects[studentSubjectsIndex].grade);
+          gotoxy(65, wherey());
+          printf(CYAN "Nota: " NORMAL "%.2f\t", studentSubjects[studentSubjectsIndex].grade);
+          gotoxy(80, wherey());
+          printf(CYAN "Situação: " NORMAL);
+
+          if (studentSubjects[studentSubjectsIndex].grade >= 6) {
+            printf(GREEN "APROVADO\n" NORMAL);
+          } else {
+            printf(RED "REPROVADO\n" NORMAL);
+          }
+        }
+      }
+    }
+  }
+
+  getch();
+}
+
+void searchSubject(Subject subjects[], int subjectsLogicSize) {
+  char term[100];
   int countSearched = 0;
   
   printf("\nTermo (palavra) para pesquisa: ");
-  gets(word);
+  gets(term);
 
   for (int subjectIndex = 0; subjectIndex < subjectsLogicSize; subjectIndex++) {
-    if (StrStrIA(subjects[subjectIndex].name, word)) {
+    if (StrStrIA(subjects[subjectIndex].name, term)) {
       printf(CYAN "Disciplina: " NORMAL "%d - %s\n", subjects[subjectIndex].code, subjects[subjectIndex].name);
       countSearched++;
     }
   }
 
   if (countSearched <= 0) {
-    printf("Nada encontrado com a palavras \"%s\" \n", word);
+    printf("Nada encontrado com a palavras \"%s\" \n", term);
   }
 
   getch();
 }
 
-void subjectMean(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize) {
+void subjectMean(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Subject subjects[], int subjectsLogicSize) {
+  int countStudents, subjectIndex;
+  float countGrade, meanGrade;
   printf("\n");
-  for (int subjectIndex = 0; subjectIndex < subjectsLogicSize; subjectIndex++) {
-    int countStudents = 0;
-    float countGrade = 0, meanGrade = 0;
+  for (subjectIndex = 0; subjectIndex < subjectsLogicSize; subjectIndex++) {
+    countStudents = 0;
+    countGrade = 0;
+    meanGrade = 0;
 
     for (int studentSubjectsIndex = 0; studentSubjectsIndex < studentSubjectsLogicSize; studentSubjectsIndex++) {
       if (studentSubjects[studentSubjectsIndex].subjectCode == subjects[subjectIndex].code) {
@@ -1031,16 +1074,16 @@ void configMenu(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize
         subjects[subjectsLogicSize].code = 210;
         strcpy(subjects[subjectsLogicSize++].name, "Algoritmos e técnicas de programação II");
 
-        subjects[subjectsLogicSize].code = 110;
+        subjects[subjectsLogicSize].code = 220;
         strcpy(subjects[subjectsLogicSize++].name, "Ambientes de programação II");
 
-        subjects[subjectsLogicSize].code = 250;
+        subjects[subjectsLogicSize].code = 230;
         strcpy(subjects[subjectsLogicSize++].name, "Arquitetura de computadores");
 
-        subjects[subjectsLogicSize].code = 300;
+        subjects[subjectsLogicSize].code = 250;
         strcpy(subjects[subjectsLogicSize++].name, "Ciência de dados");
 
-        subjects[subjectsLogicSize].code = 220;
+        subjects[subjectsLogicSize].code = 332;
         strcpy(subjects[subjectsLogicSize++].name, "Fundamentos de sistemas de informação");
 
         subjects[subjectsLogicSize].code = 443;
@@ -1056,7 +1099,6 @@ void configMenu(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize
             studentSubjects[studentSubjectsLogicSize].grade = (float) (rand() % 10001) / 1000.0;
             studentSubjectsLogicSize++;
           }
-
         configMenuOption = -1;
       }
     }
