@@ -65,17 +65,19 @@ void subjectsMenuTitle();
 // StudentSubjects
 void studentSubjectsMenu(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
 void createStudentSubject(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
-void updateStudentSubject(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
-void queryStudentSubjects(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
+void updateStudentSubject(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
+void queryStudentSubjects(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
 void deleteStudentSubject(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
 void viewStudentSubject(StudentSubjects studentSubject, Student student, int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
-int findStudentIndex(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, char studentRA[13]);
-int findStudentSubjectIndex(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, char studentRA[13], int subjectCode);
+int findStudentIndex(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, char studentRA[13]);
+int findStudentSubjectIndex(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, char studentRA[13], int subjectCode);
+
+// Reports
+void reportsMenuTitle();
+void reportsMenu(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
+void subjectMean(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize);
 
 // Menu
-void reportsMenu();
-void reportsMenuTitle();
-
 void configMenu(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, Student students[], int &studentsLogicSize, Subject subjects[], int &subjectsLogicSize);
 void configMenuTitle();
 
@@ -126,7 +128,14 @@ int main() {
         );
         break;
       case 3:
-        reportsMenu();
+        reportsMenu(
+          studentSubjects,
+          studentSubjectsLogicSize,
+          students,
+          studentsLogicSize,
+          subjects,
+          subjectsLogicSize
+        );
         break;
       case 4:
         configMenu(
@@ -576,7 +585,7 @@ void createStudentSubject(StudentSubjects studentSubjects[], int &studentSubject
   } while(studentSubjectsLogicSize < STUDENTS_SUBJECTS_FISIC_SIZE && strlen(newStudentSubject.studentRA) >= 1);
 }
 
-void updateStudentSubject(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize) {
+void updateStudentSubject(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize) {
   int code, studentIndex, subjectIndex, studentSubjectIndex, index;
   char RA[13];
 
@@ -622,7 +631,7 @@ void updateStudentSubject(StudentSubjects studentSubjects[], int &studentSubject
   } while(studentSubjectsLogicSize < STUDENTS_SUBJECTS_FISIC_SIZE && strlen(RA) >= 1);
 }
 
-void queryStudentSubjects(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize) {
+void queryStudentSubjects(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize) {
   char studentRA[13];
   int studentIndex, studentSubjectIndex, subjectCode;
 
@@ -726,7 +735,7 @@ void viewStudentSubject(StudentSubjects studentSubject, Student student, int stu
   }
 }
 
-int findStudentIndex(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, char studentRA[13]) {
+int findStudentIndex(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, char studentRA[13]) {
   int index = 0;
 
   while(index < studentSubjectsLogicSize && stricmp(studentSubjects[index].studentRA, studentRA))
@@ -739,7 +748,7 @@ int findStudentIndex(StudentSubjects studentSubjects[], int &studentSubjectsLogi
   return -1;
 }
 
-int findStudentSubjectIndex(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, char studentRA[13], int subjectCode) {
+int findStudentSubjectIndex(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, char studentRA[13], int subjectCode) {
   int index = 0;
 
   while(index < studentSubjectsLogicSize && stricmp(studentSubjects[index].studentRA, studentRA) || studentSubjects[index].subjectCode != subjectCode)
@@ -752,7 +761,7 @@ int findStudentSubjectIndex(StudentSubjects studentSubjects[], int &studentSubje
   return -1;
 }
 
-void reportsMenu() {
+void reportsMenu(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize) {
   int reportsMenuOption;
   char reportsOptions[4][CHAR_OPTION_FISIC_SIZE] = { 
     "Estudantes reprovados em 2 ou mais disciplinas",
@@ -765,7 +774,41 @@ void reportsMenu() {
     clrscr();
     reportsMenuTitle();
     reportsMenuOption = menu(reportsOptions, 4);
+
+    switch(reportsMenuOption) {
+      case 3:
+        subjectMean(
+          studentSubjects,
+          studentSubjectsLogicSize,
+          students,
+          studentsLogicSize,
+          subjects,
+          subjectsLogicSize
+        );
+        break;
+    }
   } while(reportsMenuOption != -1);
+}
+
+void subjectMean(StudentSubjects studentSubjects[], int studentSubjectsLogicSize, Student students[], int studentsLogicSize, Subject subjects[], int subjectsLogicSize) {
+  for (int subjectIndex = 0; subjectIndex < subjectsLogicSize; subjectIndex++) {
+    int countStudents = 0;
+    int countGrade = 0;
+    int meanGrade = 0;
+
+    for (int studentSubjectsIndex = 0; studentSubjectsIndex < studentSubjectsLogicSize; studentSubjectsIndex++) {
+      if (studentSubjects[studentSubjectsIndex].subjectCode == subjects[subjectIndex].code) {
+        countGrade += studentSubjects[studentSubjectsIndex].grade;
+        countStudents++;
+      }
+    }
+
+    meanGrade = countGrade / countStudents;
+
+    printf("%d\n", meanGrade);
+  }
+  
+  getch();
 }
 
 void configMenu(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize, Student students[], int &studentsLogicSize, Subject subjects[], int &subjectsLogicSize) {
@@ -975,7 +1018,7 @@ void configMenu(StudentSubjects studentSubjects[], int &studentSubjectsLogicSize
           for (indexToStudent = 0; indexToStudent < studentsLogicSize; indexToStudent++) {
             strcpy(studentSubjects[studentSubjectsLogicSize].studentRA, students[indexToStudent].RA);
             studentSubjects[studentSubjectsLogicSize].subjectCode = subjects[indexToSubject].code;
-            studentSubjects[studentSubjectsLogicSize].grade = rand() % (10 + 1);
+            studentSubjects[studentSubjectsLogicSize].grade = (float) (rand() % 10001) / 1000.0;
             studentSubjectsLogicSize++;
           }
 

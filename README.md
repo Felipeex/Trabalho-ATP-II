@@ -11,3 +11,4 @@ https://en.wikipedia.org/wiki/Box-drawing_characters
 https://stackoverflow.com/questions/12821005/how-to-stop-text-color-function-under-conio-h-in-c-to-align-the-output-to-right
 https://stackoverflow.com/questions/822323/how-to-generate-a-random-int-in-c
 https://www.geeksforgeeks.org/c-rand-function/
+https://www.reddit.com/r/cpp_questions/comments/averi0/how_do_you_generate_random_decimal_numbers_like/
